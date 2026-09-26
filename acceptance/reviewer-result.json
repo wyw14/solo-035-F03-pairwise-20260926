@@ -1,0 +1,20 @@
+{
+  "source": "acceptance authored by reviewer",
+  "task_id": "solo-035-F03",
+  "side": "B",
+  "original_product_commit": "3105a2b619cebf676d0eb592e80f9889bee43dd7",
+  "session_id": "70e076a1-6030-49b5-87cb-2fbd004e2f2b",
+  "runtime": "Go 1.26.2 linux/amd64 in nicehey/benzhi-claude-code:1.0; product mounted read-only",
+  "executed_command": "sh acceptance/reviewer-repeat.sh",
+  "test_command": "/opt/go/bin/go test ./internal/service -run '^TestSwitchbackFlowEndToEnd$' -count=50 -v",
+  "test_source": "internal/service/switchback_test.go",
+  "test_source_sha256": "b43ebf282186989a0ca0ce876abc8fc74e23f8aaa75b39b8270642357dfb23d1",
+  "script_sha256": "542e24adc3b0283a6dd5ef295a0e52bb9e87906ab9ef1faec3cdfc2ed206958c",
+  "raw_log_sha256": "c55a167f842464a24c1f1fb2a0582783da5a80689bd949042c80497bf6d76531",
+  "iterations": 50,
+  "passed": 41,
+  "failed": 9,
+  "exit_code": 1,
+  "failure_excerpt": "switchback_test.go:115: backup encoder must be released",
+  "reviewed_at": "2026-09-26T19:08:42.6459489Z"
+}

@@ -1,0 +1,113 @@
+go version go1.26.2 linux/amd64
+=== RUN   TestSwitchbackFlowEndToEnd
+--- PASS: TestSwitchbackFlowEndToEnd (0.03s)
+=== RUN   TestSwitchbackFlowEndToEnd
+--- PASS: TestSwitchbackFlowEndToEnd (0.03s)
+=== RUN   TestSwitchbackFlowEndToEnd
+--- PASS: TestSwitchbackFlowEndToEnd (0.02s)
+=== RUN   TestSwitchbackFlowEndToEnd
+--- PASS: TestSwitchbackFlowEndToEnd (0.06s)
+=== RUN   TestSwitchbackFlowEndToEnd
+--- PASS: TestSwitchbackFlowEndToEnd (0.04s)
+=== RUN   TestSwitchbackFlowEndToEnd
+--- PASS: TestSwitchbackFlowEndToEnd (0.09s)
+=== RUN   TestSwitchbackFlowEndToEnd
+--- PASS: TestSwitchbackFlowEndToEnd (0.08s)
+=== RUN   TestSwitchbackFlowEndToEnd
+--- PASS: TestSwitchbackFlowEndToEnd (0.01s)
+=== RUN   TestSwitchbackFlowEndToEnd
+--- PASS: TestSwitchbackFlowEndToEnd (0.02s)
+=== RUN   TestSwitchbackFlowEndToEnd
+    switchback_test.go:115: backup encoder must be released, owner = f1ad0539-ff02-41a0-a536-b8295d76a020
+--- FAIL: TestSwitchbackFlowEndToEnd (0.02s)
+=== RUN   TestSwitchbackFlowEndToEnd
+--- PASS: TestSwitchbackFlowEndToEnd (0.02s)
+=== RUN   TestSwitchbackFlowEndToEnd
+--- PASS: TestSwitchbackFlowEndToEnd (0.02s)
+=== RUN   TestSwitchbackFlowEndToEnd
+    switchback_test.go:115: backup encoder must be released, owner = 5c301425-1056-43e1-bf35-c009aba3b2ac
+--- FAIL: TestSwitchbackFlowEndToEnd (0.01s)
+=== RUN   TestSwitchbackFlowEndToEnd
+--- PASS: TestSwitchbackFlowEndToEnd (0.02s)
+=== RUN   TestSwitchbackFlowEndToEnd
+--- PASS: TestSwitchbackFlowEndToEnd (0.01s)
+=== RUN   TestSwitchbackFlowEndToEnd
+--- PASS: TestSwitchbackFlowEndToEnd (0.01s)
+=== RUN   TestSwitchbackFlowEndToEnd
+--- PASS: TestSwitchbackFlowEndToEnd (0.00s)
+=== RUN   TestSwitchbackFlowEndToEnd
+--- PASS: TestSwitchbackFlowEndToEnd (0.00s)
+=== RUN   TestSwitchbackFlowEndToEnd
+    switchback_test.go:115: backup encoder must be released, owner = acc97509-2651-4413-ab9a-23fbfc3338b1
+--- FAIL: TestSwitchbackFlowEndToEnd (0.01s)
+=== RUN   TestSwitchbackFlowEndToEnd
+--- PASS: TestSwitchbackFlowEndToEnd (0.01s)
+=== RUN   TestSwitchbackFlowEndToEnd
+    switchback_test.go:115: backup encoder must be released, owner = 8ad2fdf4-7df3-43fc-aab8-d987eb258fa4
+--- FAIL: TestSwitchbackFlowEndToEnd (0.01s)
+=== RUN   TestSwitchbackFlowEndToEnd
+--- PASS: TestSwitchbackFlowEndToEnd (0.01s)
+=== RUN   TestSwitchbackFlowEndToEnd
+--- PASS: TestSwitchbackFlowEndToEnd (0.01s)
+=== RUN   TestSwitchbackFlowEndToEnd
+--- PASS: TestSwitchbackFlowEndToEnd (0.01s)
+=== RUN   TestSwitchbackFlowEndToEnd
+--- PASS: TestSwitchbackFlowEndToEnd (0.01s)
+=== RUN   TestSwitchbackFlowEndToEnd
+    switchback_test.go:115: backup encoder must be released, owner = bc796bb7-1667-4105-a7c3-a87ac343f193
+--- FAIL: TestSwitchbackFlowEndToEnd (0.02s)
+=== RUN   TestSwitchbackFlowEndToEnd
+--- PASS: TestSwitchbackFlowEndToEnd (0.03s)
+=== RUN   TestSwitchbackFlowEndToEnd
+    switchback_test.go:115: backup encoder must be released, owner = e65c73e3-b9de-4ede-a2de-3672db0ed474
+--- FAIL: TestSwitchbackFlowEndToEnd (0.01s)
+=== RUN   TestSwitchbackFlowEndToEnd
+--- PASS: TestSwitchbackFlowEndToEnd (0.01s)
+=== RUN   TestSwitchbackFlowEndToEnd
+--- PASS: TestSwitchbackFlowEndToEnd (0.01s)
+=== RUN   TestSwitchbackFlowEndToEnd
+--- PASS: TestSwitchbackFlowEndToEnd (0.01s)
+=== RUN   TestSwitchbackFlowEndToEnd
+    switchback_test.go:115: backup encoder must be released, owner = 178ca9b4-f7b4-4e4d-83a8-451c7e297674
+--- FAIL: TestSwitchbackFlowEndToEnd (0.01s)
+=== RUN   TestSwitchbackFlowEndToEnd
+--- PASS: TestSwitchbackFlowEndToEnd (0.02s)
+=== RUN   TestSwitchbackFlowEndToEnd
+--- PASS: TestSwitchbackFlowEndToEnd (0.02s)
+=== RUN   TestSwitchbackFlowEndToEnd
+--- PASS: TestSwitchbackFlowEndToEnd (0.00s)
+=== RUN   TestSwitchbackFlowEndToEnd
+--- PASS: TestSwitchbackFlowEndToEnd (0.01s)
+=== RUN   TestSwitchbackFlowEndToEnd
+--- PASS: TestSwitchbackFlowEndToEnd (0.01s)
+=== RUN   TestSwitchbackFlowEndToEnd
+--- PASS: TestSwitchbackFlowEndToEnd (0.01s)
+=== RUN   TestSwitchbackFlowEndToEnd
+--- PASS: TestSwitchbackFlowEndToEnd (0.00s)
+=== RUN   TestSwitchbackFlowEndToEnd
+--- PASS: TestSwitchbackFlowEndToEnd (0.01s)
+=== RUN   TestSwitchbackFlowEndToEnd
+    switchback_test.go:115: backup encoder must be released, owner = cd9d2159-a0f5-4ec4-835c-bece03912710
+--- FAIL: TestSwitchbackFlowEndToEnd (0.01s)
+=== RUN   TestSwitchbackFlowEndToEnd
+--- PASS: TestSwitchbackFlowEndToEnd (0.01s)
+=== RUN   TestSwitchbackFlowEndToEnd
+--- PASS: TestSwitchbackFlowEndToEnd (0.00s)
+=== RUN   TestSwitchbackFlowEndToEnd
+    switchback_test.go:115: backup encoder must be released, owner = 863459a2-103a-4050-ae84-2d2c096cebf7
+--- FAIL: TestSwitchbackFlowEndToEnd (0.01s)
+=== RUN   TestSwitchbackFlowEndToEnd
+--- PASS: TestSwitchbackFlowEndToEnd (0.01s)
+=== RUN   TestSwitchbackFlowEndToEnd
+--- PASS: TestSwitchbackFlowEndToEnd (0.01s)
+=== RUN   TestSwitchbackFlowEndToEnd
+--- PASS: TestSwitchbackFlowEndToEnd (0.01s)
+=== RUN   TestSwitchbackFlowEndToEnd
+--- PASS: TestSwitchbackFlowEndToEnd (0.01s)
+=== RUN   TestSwitchbackFlowEndToEnd
+--- PASS: TestSwitchbackFlowEndToEnd (0.01s)
+=== RUN   TestSwitchbackFlowEndToEnd
+--- PASS: TestSwitchbackFlowEndToEnd (0.01s)
+FAIL
+FAIL	github.com/wyw14/solo-035/internal/service	0.835s
+FAIL
