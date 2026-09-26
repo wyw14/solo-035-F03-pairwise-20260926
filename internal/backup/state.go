@@ -14,6 +14,7 @@ type FailoverState struct {
 	Status      string             `json:"status"`
 	StartedAt   time.Time          `json:"started_at"`
 	CompletedAt *time.Time         `json:"completed_at,omitempty"`
+	RestoredAt  *time.Time         `json:"restored_at,omitempty"`
 }
 
 type State struct {
@@ -66,6 +67,20 @@ func (state *State) Cancel(eventID model.EventID) {
 	item := state.failovers[eventID]
 	item.Status = "cancelled"
 	state.failovers[eventID] = item
+}
+
+func (state *State) Restored(eventID model.EventID, now time.Time) bool {
+	state.mu.Lock()
+	defer state.mu.Unlock()
+	item, ok := state.failovers[eventID]
+	if !ok || item.Status != "active" {
+		return false
+	}
+	restored := now.UTC()
+	item.Status = "restored"
+	item.RestoredAt = &restored
+	state.failovers[eventID] = item
+	return true
 }
 
 func (state *State) Get(eventID model.EventID) (FailoverState, bool) {

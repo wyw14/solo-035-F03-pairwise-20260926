@@ -56,6 +56,9 @@ func (runtime *Runtime) RestoreFromRecords(records []journal.Record, sourceFor f
 	}
 	report := RecoveryReport{}
 	for _, result := range results {
+		if result.Revision == "" || result.Fence == 0 {
+			continue
+		}
 		report.LoadedPrograms++
 		report.Trace = append(report.Trace, "loaded-program-generation")
 		if err := runtime.PlayoutRecovery.Restore(result, sourceFor(result.EventID), "recovered-current-segment"); err != nil {

@@ -2,6 +2,7 @@ package backup
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
@@ -10,6 +11,8 @@ import (
 	"github.com/wyw14/solo-035/internal/model"
 	"github.com/wyw14/solo-035/internal/playout"
 )
+
+var ErrFailbackAborted = errors.New("failback aborted")
 
 type Coordinator struct {
 	state    *State
@@ -62,6 +65,45 @@ func (coordinator *Coordinator) Schedule(ctx context.Context, event model.LiveEv
 func (coordinator *Coordinator) Cancel(eventID model.EventID) error {
 	coordinator.state.Cancel(eventID)
 	return coordinator.playout.Cancel(eventID)
+}
+
+func (coordinator *Coordinator) Failback(event model.LiveEvent, primaryReady func() bool) (FailoverState, error) {
+	item, tracked := coordinator.state.Get(event.ID)
+	if tracked && item.Status != "active" {
+		return item, fmt.Errorf("failover for event %s is %s, not active", event.ID, item.Status)
+	}
+	path, ok := coordinator.audio.Path(event.ID)
+	if !ok || !path.BackupLive() {
+		return item, fmt.Errorf("event %s is not carrying backup media", event.ID)
+	}
+	if !primaryReady() {
+		return item, fmt.Errorf("primary source is not locked and continuous")
+	}
+	if err := coordinator.audio.PreparePrimary(event.ID); err != nil {
+		return item, err
+	}
+	if !primaryReady() {
+		if err := coordinator.audio.RetirePrimary(event.ID); err != nil {
+			return item, err
+		}
+		return item, fmt.Errorf("%w: primary signal dropped again; backup path retained", ErrFailbackAborted)
+	}
+	if err := coordinator.audio.ReleaseBackup(event.ID); err != nil {
+		return item, err
+	}
+	if !tracked {
+		return FailoverState{}, nil
+	}
+	if !coordinator.state.Restored(event.ID, coordinator.clock()) {
+		return item, fmt.Errorf("failback did not retain its failover record")
+	}
+	restored := coordinator.state.GetOrZero(event.ID)
+	if restored.Lease.ID.Valid() {
+		if err := coordinator.encoders.Release(restored.Lease); err != nil {
+			return restored, fmt.Errorf("backup encoder lease was not released: %w", err)
+		}
+	}
+	return restored, nil
 }
 
 func (coordinator *Coordinator) Status(eventID model.EventID) (FailoverState, bool) {

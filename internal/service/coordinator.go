@@ -2,9 +2,12 @@ package service
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
+	"github.com/wyw14/solo-035/internal/audio"
+	"github.com/wyw14/solo-035/internal/backup"
 	"github.com/wyw14/solo-035/internal/caption"
 	"github.com/wyw14/solo-035/internal/model"
 )
@@ -155,4 +158,63 @@ func (coordinator *Coordinator) CancelFailover(eventID model.EventID) error {
 		return err
 	}
 	return coordinator.runtime.Backup.Cancel(eventID)
+}
+
+type FailbackResult struct {
+	EventID    model.EventID         `json:"event_id"`
+	Restored   bool                  `json:"restored"`
+	ActivePath string                `json:"active_path"`
+	Failover   *backup.FailoverState `json:"failover,omitempty"`
+	Audio      audio.PathState       `json:"audio"`
+}
+
+func (coordinator *Coordinator) Failback(eventID model.EventID, sourceID model.SourceID) (FailbackResult, error) {
+	event, ok := coordinator.runtime.Events.Get(eventID)
+	if !ok {
+		return FailbackResult{}, fmt.Errorf("event %s not found", eventID)
+	}
+	primaryReady := func() bool {
+		if !coordinator.runtime.SourceFlow.Ready(sourceID) {
+			return false
+		}
+		status, ok := coordinator.runtime.Sync.Status(eventID)
+		return ok && status.Stable && status.Source == sourceID
+	}
+	state, err := coordinator.runtime.Backup.Failback(event, primaryReady)
+	aborted := errors.Is(err, backup.ErrFailbackAborted)
+	if err != nil && !aborted {
+		return FailbackResult{}, err
+	}
+	result := FailbackResult{EventID: eventID, Restored: !aborted}
+	if state.Status != "" {
+		result.Failover = &state
+	}
+	result.Audio, _ = coordinator.runtime.AudioState.Path(eventID)
+	result.ActivePath = result.Audio.Active()
+	details := map[string]any{"restored": result.Restored, "source": sourceID}
+	if state.Status != "" {
+		details["failover_status"] = state.Status
+	}
+	if recordErr := coordinator.recordMediaPath(eventID, "audio-failback", details); recordErr != nil {
+		return result, recordErr
+	}
+	return result, nil
+}
+
+func (coordinator *Coordinator) recordMediaPath(eventID model.EventID, trigger string, details map[string]any) error {
+	path, ok := coordinator.runtime.AudioState.Path(eventID)
+	if !ok {
+		return fmt.Errorf("audio path for event %s does not exist", eventID)
+	}
+	payload := map[string]any{
+		"trigger":      trigger,
+		"active_path":  path.Active(),
+		"primary_live": path.PrimaryLive(),
+		"backup_live":  path.BackupLive(),
+	}
+	for key, value := range details {
+		payload[key] = value
+	}
+	_, err := coordinator.runtime.Journal.Persist(eventID, "media-path", "", 0, payload)
+	return err
 }

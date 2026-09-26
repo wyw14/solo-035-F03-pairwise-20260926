@@ -82,6 +82,66 @@ func (state *State) ConnectBackup(eventID model.EventID, now time.Time) error {
 	return nil
 }
 
+func (state *State) PreparePrimary(eventID model.EventID, now time.Time) error {
+	state.mu.Lock()
+	defer state.mu.Unlock()
+	path, ok := state.paths[eventID]
+	if !ok {
+		return fmt.Errorf("audio path for event %s does not exist", eventID)
+	}
+	if !path.BackupVideoLive || !path.BackupAudioLive {
+		return fmt.Errorf("backup media must carry the program before primary is prepared")
+	}
+	if path.PrimaryVideoLive || path.PrimaryAudioLive {
+		return fmt.Errorf("primary media is already prepared")
+	}
+	path.PrimaryVideoLive = true
+	path.PrimaryAudioLive = true
+	path.UpdatedAt = now.UTC()
+	path.Sequence = append(path.Sequence, "prepare-primary-media")
+	state.paths[eventID] = path
+	return nil
+}
+
+func (state *State) ReleaseBackup(eventID model.EventID, now time.Time) error {
+	state.mu.Lock()
+	defer state.mu.Unlock()
+	path, ok := state.paths[eventID]
+	if !ok {
+		return fmt.Errorf("audio path for event %s does not exist", eventID)
+	}
+	if !path.PrimaryVideoLive || !path.PrimaryAudioLive {
+		return fmt.Errorf("primary media must be live before backup releases")
+	}
+	path.BackupVideoLive = false
+	path.BackupAudioLive = false
+	path.UpdatedAt = now.UTC()
+	path.Sequence = append(path.Sequence, "release-backup-media")
+	state.paths[eventID] = path
+	return nil
+}
+
+func (path PathState) PrimaryLive() bool {
+	return path.PrimaryVideoLive && path.PrimaryAudioLive
+}
+
+func (path PathState) BackupLive() bool {
+	return path.BackupVideoLive && path.BackupAudioLive
+}
+
+func (path PathState) Active() string {
+	switch {
+	case path.PrimaryLive() && path.BackupLive():
+		return "both"
+	case path.PrimaryLive():
+		return "primary"
+	case path.BackupLive():
+		return "backup"
+	default:
+		return "none"
+	}
+}
+
 func (state *State) Path(eventID model.EventID) (PathState, bool) {
 	state.mu.RLock()
 	defer state.mu.RUnlock()

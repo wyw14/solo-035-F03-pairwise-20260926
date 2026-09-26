@@ -86,8 +86,15 @@ func (runtime *Runtime) ExecuteControl(ctx context.Context, request ControlReque
 		if err := runtime.Audio.Failover(eventID); err != nil {
 			return result, err
 		}
+		if err := coordinator.recordMediaPath(eventID, "audio-failover", nil); err != nil {
+			return result, err
+		}
 		result.Value, _ = runtime.AudioState.Path(eventID)
 		return result, nil
+	case "audio-failback":
+		value, err := coordinator.Failback(eventID, sourceID)
+		result.Value = value
+		return result, err
 	case "caption-error":
 		event, ok := runtime.Events.Get(eventID)
 		if !ok {
@@ -122,6 +129,9 @@ func (runtime *Runtime) ExecuteControl(ctx context.Context, request ControlReque
 			return result, err
 		}
 		if err := <-worker; err != nil {
+			return result, err
+		}
+		if err := coordinator.recordMediaPath(eventID, "schedule-failover", nil); err != nil {
 			return result, err
 		}
 		result.Value = decision
