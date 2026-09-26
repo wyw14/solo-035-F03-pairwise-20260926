@@ -8,12 +8,15 @@ import (
 )
 
 type FailoverState struct {
-	EventID     model.EventID      `json:"event_id"`
-	Command     model.CommandID    `json:"command"`
-	Lease       model.EncoderLease `json:"lease"`
-	Status      string             `json:"status"`
-	StartedAt   time.Time          `json:"started_at"`
-	CompletedAt *time.Time         `json:"completed_at,omitempty"`
+	EventID      model.EventID      `json:"event_id"`
+	Command      model.CommandID    `json:"command"`
+	Lease        model.EncoderLease `json:"lease"`
+	Status       string             `json:"status"`
+	StartedAt    time.Time          `json:"started_at"`
+	CompletedAt  *time.Time         `json:"completed_at,omitempty"`
+	RevertStage  string             `json:"revert_stage,omitempty"`
+	RevertReason string             `json:"revert_reason,omitempty"`
+	RevertedAt   *time.Time         `json:"reverted_at,omitempty"`
 }
 
 type State struct {
@@ -65,6 +68,61 @@ func (state *State) Cancel(eventID model.EventID) {
 	defer state.mu.Unlock()
 	item := state.failovers[eventID]
 	item.Status = "cancelled"
+	state.failovers[eventID] = item
+}
+
+func (state *State) BeginRevert(eventID model.EventID, now time.Time) {
+	state.mu.Lock()
+	defer state.mu.Unlock()
+	item, ok := state.failovers[eventID]
+	if !ok {
+		return
+	}
+	item.RevertStage = "verify-primary"
+	item.RevertReason = ""
+	item.RevertedAt = nil
+	state.failovers[eventID] = item
+}
+
+func (state *State) NoteRevert(eventID model.EventID, stage RevertStage) {
+	state.mu.Lock()
+	defer state.mu.Unlock()
+	item, ok := state.failovers[eventID]
+	if !ok {
+		return
+	}
+	item.RevertStage = string(stage)
+	item.RevertReason = ""
+	state.failovers[eventID] = item
+}
+
+func (state *State) AbortRevert(eventID model.EventID, now time.Time, reason string) {
+	state.mu.Lock()
+	defer state.mu.Unlock()
+	item, ok := state.failovers[eventID]
+	if !ok {
+		return
+	}
+	item.RevertStage = "aborted"
+	item.RevertReason = reason
+	// Backup remains the active on-air path after an aborted switchback.
+	item.Status = "active"
+	state.failovers[eventID] = item
+}
+
+func (state *State) CompleteRevert(eventID model.EventID, now time.Time) {
+	state.mu.Lock()
+	defer state.mu.Unlock()
+	item, ok := state.failovers[eventID]
+	if !ok {
+		return
+	}
+	completed := now.UTC()
+	item.Status = "reverted"
+	item.RevertStage = "reverted"
+	item.RevertReason = ""
+	item.RevertedAt = &completed
+	item.Lease = model.EncoderLease{}
 	state.failovers[eventID] = item
 }
 

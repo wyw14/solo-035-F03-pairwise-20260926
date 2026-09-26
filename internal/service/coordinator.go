@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/wyw14/solo-035/internal/backup"
 	"github.com/wyw14/solo-035/internal/caption"
 	"github.com/wyw14/solo-035/internal/model"
 )
@@ -155,4 +156,40 @@ func (coordinator *Coordinator) CancelFailover(eventID model.EventID) error {
 		return err
 	}
 	return coordinator.runtime.Backup.Cancel(eventID)
+}
+
+// RevertSwitchback returns a failed-over event to the recovered primary.
+// It refuses unless the primary source is locked and its pictures are
+// continuous; if the signal drops at any gate the backup path stays on air.
+func (coordinator *Coordinator) RevertSwitchback(eventID model.EventID, sourceID model.SourceID) (backup.RevertResult, error) {
+	event, ok := coordinator.runtime.Events.Get(eventID)
+	if !ok {
+		return backup.RevertResult{}, fmt.Errorf("event %s not found", eventID)
+	}
+	if !sourceID.Valid() {
+		if status, known := coordinator.runtime.Sync.Status(eventID); known {
+			sourceID = status.Source
+		}
+	}
+	result, err := coordinator.runtime.Backup.Revert(event, sourceID)
+	if err != nil {
+		return result, err
+	}
+	if _, err := coordinator.runtime.EventFlow.MarkOnAir(eventID); err != nil {
+		return result, fmt.Errorf("primary media is live but event phase failed to return on air: %w", err)
+	}
+	return result, nil
+}
+
+func (coordinator *Coordinator) ScheduleRevert(ctx context.Context, eventID model.EventID, sourceID model.SourceID, delay time.Duration) (<-chan error, error) {
+	event, ok := coordinator.runtime.Events.Get(eventID)
+	if !ok {
+		return nil, fmt.Errorf("event %s not found", eventID)
+	}
+	if !sourceID.Valid() {
+		if status, known := coordinator.runtime.Sync.Status(eventID); known {
+			sourceID = status.Source
+		}
+	}
+	return coordinator.runtime.Backup.ScheduleRevert(ctx, event, sourceID, delay), nil
 }

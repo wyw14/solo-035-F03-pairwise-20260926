@@ -96,7 +96,7 @@ func NewRuntime(dataDirectory string, clock func() time.Time) (*Runtime, error) 
 	runtime.PlayoutFlow = playout.NewIntegration(runtime.PlayoutState)
 	runtime.PlayoutRecovery = playout.NewRecovery(runtime.PlayoutState, clock)
 	runtime.BackupState = backup.NewState()
-	runtime.Backup = backup.NewCoordinator(runtime.BackupState, runtime.Audio, runtime.EncoderFlow, runtime.PlayoutFlow, clock)
+	runtime.Backup = backup.NewCoordinator(runtime.BackupState, runtime.Audio, runtime.EncoderFlow, runtime.PlayoutFlow, runtime.SourceFlow, runtime.Sync, clock)
 	if runtime.Backup == nil {
 		return nil, fmt.Errorf("backup coordinator was not constructed")
 	}

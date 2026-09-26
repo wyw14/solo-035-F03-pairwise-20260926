@@ -132,6 +132,23 @@ func (runtime *Runtime) ExecuteControl(ctx context.Context, request ControlReque
 		}
 		result.Value = eventID
 		return result, nil
+	case "revert-primary":
+		revert, err := coordinator.RevertSwitchback(eventID, sourceID)
+		if err != nil {
+			return result, err
+		}
+		result.Value = revert
+		return result, nil
+	case "schedule-revert":
+		worker, err := coordinator.ScheduleRevert(ctx, eventID, sourceID, time.Duration(request.DelayMillis)*time.Millisecond)
+		if err != nil {
+			return result, err
+		}
+		if err := <-worker; err != nil {
+			return result, err
+		}
+		result.Value, _ = runtime.Backup.Status(eventID)
+		return result, nil
 	case "recover-journal":
 		report, err := runtime.Recover(func(model.EventID) model.SourceID {
 			if sourceID.Valid() {

@@ -9,6 +9,8 @@ import (
 	"github.com/wyw14/solo-035/internal/encoder"
 	"github.com/wyw14/solo-035/internal/model"
 	"github.com/wyw14/solo-035/internal/playout"
+	"github.com/wyw14/solo-035/internal/source"
+	"github.com/wyw14/solo-035/internal/syncer"
 )
 
 type Coordinator struct {
@@ -16,11 +18,29 @@ type Coordinator struct {
 	audio    *audio.Switch
 	encoders *encoder.Coordinator
 	playout  *playout.Integration
+	sources  *source.Coordinator
+	sync     *syncer.Coordinator
 	clock    func() time.Time
 }
 
-func NewCoordinator(state *State, audioSwitch *audio.Switch, encoders *encoder.Coordinator, playoutIntegration *playout.Integration, clock func() time.Time) *Coordinator {
-	return &Coordinator{state: state, audio: audioSwitch, encoders: encoders, playout: playoutIntegration, clock: clock}
+func NewCoordinator(
+	state *State,
+	audioSwitch *audio.Switch,
+	encoders *encoder.Coordinator,
+	playoutIntegration *playout.Integration,
+	sourceFlow *source.Coordinator,
+	syncFlow *syncer.Coordinator,
+	clock func() time.Time,
+) *Coordinator {
+	return &Coordinator{
+		state:    state,
+		audio:    audioSwitch,
+		encoders: encoders,
+		playout:  playoutIntegration,
+		sources:  sourceFlow,
+		sync:     syncFlow,
+		clock:    clock,
+	}
 }
 
 func (coordinator *Coordinator) Failover(event model.LiveEvent, profile string) (FailoverState, error) {
